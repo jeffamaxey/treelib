@@ -78,12 +78,16 @@ class NodeCase(unittest.TestCase):
 
     def test_data(self):
 
+
+
+
         class Flower(object):
             def __init__(self, color):
                 self.color = color
 
             def __str__(self):
-                return "%s" % self.color
+                return f"{self.color}"
+
 
         self.node1.data = Flower("red")
         self.assertEqual(self.node1.data.color, "red")

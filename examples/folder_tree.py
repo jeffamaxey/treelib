@@ -29,7 +29,7 @@ PROFILING = 0
 
 if PROFILING == 1:
     import timeit
-if PROFILING == 2:
+elif PROFILING == 2:
     import cProfile
 
 
@@ -52,8 +52,8 @@ def crc32(data):
 
     if DEBUG:
         print('++++++ CRC32 ++++++')
-        print('input: ' + str(data))
-        print('crc32: ' + hex(zlib.crc32(data) & 0xffffffff))
+        print(f'input: {data}')
+        print(f'crc32: {hex(zlib.crc32(data) & 4294967295)}')
         print('+++++++++++++++++++')
     return hex(zlib.crc32(data) & 0xffffffff)  # crc32 returns a signed value, &-ing it will match py3k
 
@@ -76,7 +76,11 @@ def get_noteid(depth, root, dir):
         <depth>_<dirname>+++<crc32>
         e.g. 2_Folder_XYZ_1+++<crc32>
     """
-    return str(str(depth) + '_' + dir).replace(" ", "_") + '+++' + crc32(os.path.join(root, dir))
+    return (
+        str(f'{str(depth)}_{dir}').replace(" ", "_")
+        + '+++'
+        + crc32(os.path.join(root, dir))
+    )
 
 # TODO: Verzeichnistiefe pruefen: Was ist mit sowas /mp3/
 
@@ -95,17 +99,21 @@ def get_parentid(current_depth, root, dir):
     pos2 = search_string.rfind('/')
     pos1 = search_string.rfind('/', 0, pos2)
     parent_dir = search_string[pos1 + 1:pos2]
-    parentid = str(current_depth - 1) + '_' + parent_dir.replace(" ", "_") + '+++' + crc32(root)
-    return parentid
+    return (
+        f'{str(current_depth - 1)}_'
+        + parent_dir.replace(" ", "_")
+        + '+++'
+        + crc32(root)
+    )
     # TODO: catch error
 
 
 def print_node(dir, node_id, parent_id):
     print('#############################')
     print('node created')
-    print('      dir:     ' + dir)
-    print('      note_id: ' + node_id)
-    print('      parent:  ' + parent_id)
+    print(f'      dir:     {dir}')
+    print(f'      note_id: {node_id}')
+    print(f'      parent:  {parent_id}')
 
 
 def crawler():
@@ -121,7 +129,7 @@ def crawler():
             current_depth = os.path.join(root, dir).count('/') - start_depth
 
             if DEBUG:
-                print('current: ' + os.path.join(root, dir))
+                print(f'current: {os.path.join(root, dir)}')
 
             node_id = get_noteid(current_depth, root, dir)
             parent_id = str(get_parentid(current_depth, root, dir))
@@ -146,7 +154,7 @@ def crawler():
             current_depth = os.path.join(root, filename).count('/') - start_depth
 
             if DEBUG:
-                print('current: ' + os.path.join(root, filename))
+                print(f'current: {os.path.join(root, filename)}')
 
             node_id = get_noteid(current_depth, root, filename)
             parent_id = str(get_parentid(current_depth, root, filename))
@@ -166,13 +174,13 @@ if PROFILING == 0:
     crawler()
 if PROFILING == 1:
     t1 = timeit.Timer("crawler()", "from __main__ import crawler")
-    print('time:      ' + str(t1.timeit(number=1)))
+    print(f'time:      {str(t1.timeit(number=1))}')
 if PROFILING == 2:
     cProfile.run("crawler()")
 
 
-print('filecount: ' + str(FILECOUNT))
-print('dircount:  ' + str(DIRCOUNT))
+print(f'filecount: {str(FILECOUNT)}')
+print(f'dircount:  {str(DIRCOUNT)}')
 
 if DIR_ERRORLIST:
     for item in DIR_ERRORLIST:
@@ -188,6 +196,6 @@ if FILE_ERRORLIST:
 else:
     print('no file errors')
 
-print('nodes: ' + str(len(dir_tree.nodes)))
+print(f'nodes: {len(dir_tree.nodes)}')
 
 dir_tree.show()

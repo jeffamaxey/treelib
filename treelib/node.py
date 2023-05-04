@@ -52,11 +52,7 @@ class Node(object):
 
         #: None or something else
         #: if None, self._identifier will be set to the identifier's value.
-        if tag is None:
-            self._tag = self._identifier
-        else:
-            self._tag = tag
-
+        self._tag = self._identifier if tag is None else tag
         #: boolean
         self.expanded = expanded
 
@@ -80,10 +76,7 @@ class Node(object):
 
     def _set_identifier(self, nid):
         """Initialize self._set_identifier"""
-        if nid is None:
-            self._identifier = str(uuid.uuid1())
-        else:
-            self._identifier = nid
+        self._identifier = str(uuid.uuid1()) if nid is None else nid
 
     @property
     @deprecated(alias='node.predecessor')
@@ -148,10 +141,10 @@ class Node(object):
     def set_successors(self, value, tree_id=None):
         """Set the value of `_successors`."""
         setter_lookup = {
-            'NoneType': lambda x: list(),
+            'NoneType': lambda x: [],
             'list': lambda x: x,
             'dict': lambda x: list(x.keys()),
-            'set': lambda x: list(x)
+            'set': lambda x: list(x),
         }
 
         t = value.__class__.__name__
@@ -159,7 +152,7 @@ class Node(object):
             f_setter = setter_lookup[t]
             self._successors[tree_id] = f_setter(value)
         else:
-            raise NotImplementedError('Unsupported value type %s' % t)
+            raise NotImplementedError(f'Unsupported value type {t}')
 
     def update_successors(self, nid, mode=ADD, replace=None, tree_id=None):
         """
@@ -198,7 +191,7 @@ class Node(object):
         }
 
         if mode not in manipulator_lookup:
-            raise NotImplementedError('Unsupported node updating mode %s' % str(mode))
+            raise NotImplementedError(f'Unsupported node updating mode {str(mode)}')
 
         f_name = manipulator_lookup.get(mode)
         f = locals()[f_name]
@@ -240,10 +233,7 @@ class Node(object):
             else:
                 tree_id = self._initial_tree_id
 
-        if len(self.successors(tree_id)) == 0:
-            return True
-        else:
-            return False
+        return len(self.successors(tree_id)) == 0
 
     def is_root(self, tree_id=None):
         """Return true if self has no parent, i.e. as root."""
@@ -276,4 +266,4 @@ class Node(object):
             "identifier={0}".format(self.identifier),
             "data={0}".format(self.data),
         ]
-        return "%s(%s)" % (name, ", ".join(kwargs))
+        return f'{name}({", ".join(kwargs)})'

@@ -32,7 +32,7 @@ def build_recursive_tree(tree, base, depth, width):
     """
     if depth >= 0:
         depth -= 1
-        for i in xrange(width):
+        for _ in xrange(width):
             directory = Directory()
             tree.create_node("{0}".format(directory.name), "{0}".format(hashlib.md5(directory.name)),
                              parent=base.identifier, data=directory)  # node identifier is md5 hash of it's name
